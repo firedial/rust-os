@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(offset_of)]
 
+use core::arch::asm;
 use core::mem::offset_of;
 use core::mem::size_of;
 use core::panic::PanicInfo;
@@ -24,7 +25,9 @@ fn efi_main(_image_handle: EfiHandle, efi_system_table: &EfiSystemTable) {
         *e = 0xffffff;
     }
     // println!("Hello, world!");
-    loop {}
+    loop {
+        hlt()
+    }
 }
 
 #[repr(C)]
@@ -65,7 +68,7 @@ struct EfiGuid {
 #[derive(Debug)]
 struct EfiGraphicsOutputProtocol<'a> {
     reserved: [u64; 3],
-    pub mode: &'a EfiGraphicsOutputProtocolMode<'a>
+    pub mode: &'a EfiGraphicsOutputProtocolMode<'a>,
 }
 
 #[repr(C)]
@@ -110,6 +113,10 @@ fn locate_graphic_protocol<'a>(
 #[repr(u64)]
 enum EfiStatus {
     Success = 0,
+}
+
+pub fn hlt() {
+    unsafe { asm!("hlt") }
 }
 
 #[panic_handler]
